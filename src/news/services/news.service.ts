@@ -34,7 +34,7 @@ export class NewsService {
     const findedIndex = this.news.findIndex(
       (allNews) => allNews.id === news.id,
     );
-    news[findedIndex] = news;
+    this.news[findedIndex] = JSON.parse(JSON.stringify({ ...news }));
     return news;
   }
 

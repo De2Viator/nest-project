@@ -37,6 +37,7 @@ export class NewsController {
 
   @Post('')
   async redactNews(@Body() news: RedactNewsDto, @Res() res: Response) {
+    console.log(news);
     const response: Error | RedactNewsDto = await this.newsService.redactNews(
       news,
     );

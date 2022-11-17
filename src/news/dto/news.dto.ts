@@ -21,7 +21,6 @@ export class CreateNewsDto {
 }
 
 export class RedactNewsDto extends News {}
-
 export class DeleteNewsDto {
   @ApiProperty() @IsString() id: string;
 }
