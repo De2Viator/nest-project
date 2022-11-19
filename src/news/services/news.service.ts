@@ -10,14 +10,19 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class NewsService {
-  news: News[] = [];
+  news: Map<string, News> = new Map();
 
   async getNews() {
-    return this.news;
+    const resultMap: Record<string, News> = {};
+    this.news.forEach((news, id) => {
+      resultMap[id] = news;
+    });
+
+    return resultMap;
   }
 
   async findNews(news: FindNewsDto) {
-    return this.news.find((allNews) => allNews.id === news.id);
+    return this.news.get(news.id);
   }
 
   async addNews(news: CreateNewsDto) {
@@ -25,24 +30,18 @@ export class NewsService {
       id: uuidv4(),
       ...news,
     };
-
-    this.news.push(addedNews);
+    this.news.set(addedNews.id, addedNews);
     return addedNews;
   }
 
   async redactNews(news: RedactNewsDto) {
-    const findedIndex = this.news.findIndex(
-      (allNews) => allNews.id === news.id,
-    );
-    this.news[findedIndex] = JSON.parse(JSON.stringify({ ...news }));
+    this.news.set(news.id, news);
     return news;
   }
 
   async deleteNews(news: DeleteNewsDto) {
-    const findedIndex = this.news.findIndex(
-      (allNews) => allNews.id === news.id,
-    );
-    const deletedNews = this.news.splice(findedIndex, 1);
+    const deletedNews = JSON.parse(JSON.stringify(this.news.get(news.id)));
+    this.news.delete(news.id);
     return deletedNews;
   }
 }
