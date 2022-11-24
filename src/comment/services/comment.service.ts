@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { AddCommentDto, Comment, EditCommentDto } from '../dto/comment.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { PATH } from 'src/shared/constants';
 
 @Injectable()
 export class CommentService {
   comments: Map<string, Comment> = new Map();
 
   async getComments(newsId: string): Promise<Record<string, Comment>> {
-    console.log(newsId);
     const resultMap: Record<string, Comment> = {};
     this.comments.forEach((comment, id) => {
       if (comment.newsId === newsId) {
@@ -17,10 +17,14 @@ export class CommentService {
     return resultMap;
   }
 
-  async addComment(comment: AddCommentDto): Promise<Comment> {
+  async addComment(
+    comment: AddCommentDto,
+    image: Express.Multer.File,
+  ): Promise<Comment> {
     const addedComment: Comment = {
       id: uuidv4(),
       ...comment,
+      cover: PATH + image.filename,
       nestedComments: [],
     };
     this.comments.set(addedComment.id, addedComment);
@@ -38,8 +42,9 @@ export class CommentService {
   async updateComment(
     commentId: string,
     comment: EditCommentDto,
+    image: Express.Multer.File,
   ): Promise<Comment> {
-    this.comments.set(commentId, comment);
+    this.comments.set(commentId, { ...comment, cover: PATH + image.filename });
     return this.comments.get(commentId);
   }
 

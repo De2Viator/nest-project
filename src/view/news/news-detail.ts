@@ -5,10 +5,14 @@ export const renderDetailedNews = (news: News, comments: Comment[]) => {
   let commentContent = '';
   comments.forEach((comment) => {
     commentContent += `
-    <p>${comment.author}</p>
-    <p>${comment.text}</p>
+    <img src=${comment.cover} />
+    <div class='d-flex'>
+      <p>${comment.author}</p>
+      <p>${comment.text}</p>
+    </div>
     <form action='http://localhost:3000/comment/nest/${comment.id}' method='POST'>
       <input name='text' type='text'/>
+      <input name='image' type='file' />
       <button type='submit'>Reply</button>
     <form>`;
     comment.nestedComments.forEach((nested) => {

@@ -8,6 +8,7 @@ export class AddCommentDto {
 
 export class Comment extends AddCommentDto {
   @IsString() id: string;
+  @IsString() cover: string;
   nestedComments: NestedComments[];
 }
 
