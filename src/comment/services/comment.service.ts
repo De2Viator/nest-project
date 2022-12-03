@@ -20,9 +20,11 @@ export class CommentService {
   async addComment(
     comment: AddCommentDto,
     image: Express.Multer.File,
+    newsId: string,
   ): Promise<Comment> {
     const addedComment: Comment = {
       id: uuidv4(),
+      newsId,
       ...comment,
       cover: PATH + image.filename,
       nestedComments: [],

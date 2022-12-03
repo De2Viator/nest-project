@@ -3,12 +3,12 @@ import { IsString } from 'class-validator';
 export class AddCommentDto {
   @IsString() text: string;
   @IsString() author: string;
-  @IsString() newsId: string;
 }
 
 export class Comment extends AddCommentDto {
   @IsString() id: string;
   @IsString() cover: string;
+  @IsString() newsId: string;
   nestedComments: NestedComments[];
 }
 

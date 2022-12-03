@@ -7,6 +7,7 @@ import {
   RedactNewsDto,
 } from '../dto/news.dto';
 import { v4 as uuidv4 } from 'uuid';
+import { PATH } from 'src/shared/constants';
 
 @Injectable()
 export class NewsService {
@@ -25,8 +26,9 @@ export class NewsService {
     return this.news.get(news.id);
   }
 
-  async addNews(news: CreateNewsDto) {
-    const addedNews = {
+  async addNews(news: CreateNewsDto, image: Express.Multer.File) {
+    const addedNews: News = {
+      cover: PATH + image.filename,
       id: uuidv4(),
       ...news,
     };
@@ -34,9 +36,17 @@ export class NewsService {
     return addedNews;
   }
 
-  async redactNews(news: RedactNewsDto) {
-    this.news.set(news.id, news);
-    return news;
+  async redactNews(news: RedactNewsDto, image: Express.Multer.File) {
+    const originalNews = this.news.get(news.id);
+    let cover = originalNews.cover;
+    if (image) cover = PATH + image.filename;
+    const reworkedNews: News = {
+      ...originalNews,
+      ...news,
+      cover,
+    };
+    this.news.set(news.id, reworkedNews);
+    return reworkedNews;
   }
 
   async deleteNews(news: DeleteNewsDto) {

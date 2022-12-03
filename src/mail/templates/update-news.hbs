@@ -1,0 +1,6 @@
+<h1>Hello, {{user.name}}. We updated news</h1>
+<a href="http://localhost:3000/{{id}}/details"></a>
+{{#each changes}}
+    <s>{{this.original}}</s>
+    <p>{{this.updated}}</p>
+{{/each}}
