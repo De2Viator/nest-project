@@ -6,52 +6,59 @@ import {
   News,
   RedactNewsDto,
 } from '../dto/news.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { PATH } from 'src/shared/constants';
+import { InjectRepository } from '@nestjs/typeorm';
+import { NewsEntity } from '../entities/news.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class NewsService {
-  news: Map<string, News> = new Map();
+  constructor(
+    @InjectRepository(NewsEntity)
+    private readonly newsRepository: Repository<NewsEntity>,
+  ) {}
 
   async getNews() {
-    const resultMap: Record<string, News> = {};
-    this.news.forEach((news, id) => {
-      resultMap[id] = news;
-    });
+    const response = await this.newsRepository.find();
+    return response;
+  }
 
-    return resultMap;
+  async getAuthorNews(authorId: number) {
+    return await this.newsRepository.findBy({ authorId });
   }
 
   async findNews(news: FindNewsDto) {
-    return this.news.get(news.id);
+    const response = await this.newsRepository.findOneBy({ id: news.id });
+    return response;
   }
 
   async addNews(news: CreateNewsDto, image: Express.Multer.File) {
-    const addedNews: News = {
-      cover: PATH + image.filename,
-      id: uuidv4(),
-      ...news,
-    };
-    this.news.set(addedNews.id, addedNews);
+    const addedNews = new NewsEntity();
+    addedNews.author = news.author;
+    addedNews.cover = PATH + image.filename;
+    addedNews.title = news.title;
+    addedNews.description = news.description;
+    addedNews.authorId = news.authorId;
+    await this.newsRepository.save(addedNews);
     return addedNews;
   }
 
   async redactNews(news: RedactNewsDto, image: Express.Multer.File) {
-    const originalNews = this.news.get(news.id);
+    const originalNews = await this.newsRepository.findOneBy({ id: news.id });
     let cover = originalNews.cover;
     if (image) cover = PATH + image.filename;
-    const reworkedNews: News = {
+    const reworkedNews = {
       ...originalNews,
       ...news,
       cover,
     };
-    this.news.set(news.id, reworkedNews);
+    await this.newsRepository.update({ id: news.id }, reworkedNews);
     return reworkedNews;
   }
 
   async deleteNews(news: DeleteNewsDto) {
-    const deletedNews = JSON.parse(JSON.stringify(this.news.get(news.id)));
-    this.news.delete(news.id);
+    const deletedNews = await this.newsRepository.findOneBy({ id: news.id });
+    await this.newsRepository.delete({ id: news.id });
     return deletedNews;
   }
 }

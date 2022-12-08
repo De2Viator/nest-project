@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Render,
   Res,
   UploadedFile,
@@ -40,25 +41,19 @@ export class NewsController {
   @Render('all-news')
   async getAllNewsPage() {
     const allNews = await this.newsService.getNews();
-    const renderedNews: News[] = [];
-    for (const news in allNews) {
-      renderedNews.push({ ...allNews[news], id: news });
-    }
     return {
       title: 'Все новости',
-      news: renderedNews,
+      news: allNews,
     };
   }
 
   @Get('/:newsId/details')
   @Render('details-news')
-  async getNewsPage(@Param('newsId') newsId: string) {
+  async getNewsPage(@Param('newsId') newsId: number) {
     const news = await this.newsService.findNews({ id: newsId });
-    const newsComments = await this.commentService.getComments(newsId);
+    console.log(news);
+    const newsComments = await this.commentService.getComments(+newsId);
     const comments: Comment[] = [];
-    for (const id in newsComments) {
-      comments.push({ ...newsComments[id], id });
-    }
     return {
       news,
       comments,
@@ -67,7 +62,8 @@ export class NewsController {
   }
 
   @Get('find')
-  async findNews(@Body() news: FindNewsDto) {
+  async findNews(@Query('news') news: FindNewsDto) {
+    console.log(news);
     return await this.newsService.findNews(news);
   }
 
@@ -84,6 +80,8 @@ export class NewsController {
     @Body() news: CreateNewsDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    console.log(news);
+    news.authorId = +news.authorId;
     const addedNews = await this.newsService.addNews(news, file);
     await this.mailService.sendMailAboutFreshNews(
       [
@@ -136,5 +134,10 @@ export class NewsController {
   @Delete('')
   async deleteNews(@Body() news: DeleteNewsDto) {
     return await this.newsService.deleteNews(news);
+  }
+
+  @Get('author')
+  async getAuthorNews(@Query('authorId') authorId: number) {
+    return await this.newsService.getAuthorNews(authorId);
   }
 }

@@ -23,8 +23,8 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Get('/:newsId')
-  async getComments(@Param('newsId') newsId: string) {
-    const response = await this.commentService.getComments(newsId);
+  async getComments(@Param('newsId') newsId: number) {
+    const response = await this.commentService.getComments(+newsId);
     return response;
   }
 
@@ -40,12 +40,12 @@ export class CommentController {
   async addComment(
     @Body() comment: AddCommentDto,
     @UploadedFile() file: Express.Multer.File,
-    @Param('newsId') newsId: string,
+    @Param('newsId') newsId: number,
   ) {
     const response = await this.commentService.addComment(
       comment,
       file,
-      newsId,
+      +newsId,
     );
     return response;
   }
@@ -58,7 +58,7 @@ export class CommentController {
 
   @Post('/nest/:commentId')
   async addNestedComment(
-    @Param('commentId') commentId: string,
+    @Param('commentId') commentId: number,
     @Body('text') text: string,
   ) {
     const response = await this.commentService.addNestedComment(
@@ -78,14 +78,12 @@ export class CommentController {
     }),
   )
   async updateComment(
-    @Param('commentId') commentId: string,
+    @Param('commentId') commentId: number,
     @Body() comment: EditCommentDto,
-    @UploadedFile() file: Express.Multer.File,
   ) {
     const response = await this.commentService.updateComment(
       commentId,
       comment,
-      file,
     );
     return response;
   }
