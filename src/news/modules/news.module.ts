@@ -10,5 +10,6 @@ import { NewsEntity } from '../entities/news.entity';
   imports: [CommentModule, MailModule, TypeOrmModule.forFeature([NewsEntity])],
   controllers: [NewsController],
   providers: [NewsService],
+  exports: [NewsService, TypeOrmModule],
 })
 export class NewsModule {}

@@ -2,11 +2,12 @@ import {
   BaseEntity,
   Column,
   Entity,
-  JoinTable,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CommentEntity } from '../../comment/entities/comment.entity';
+import { UserEntity } from '../../user/entities/user.entity';
 
 @Entity('tbl_news')
 export class NewsEntity extends BaseEntity {
@@ -46,7 +47,9 @@ export class NewsEntity extends BaseEntity {
   })
   views: number;
 
-  @OneToMany((type) => CommentEntity, (comment) => comment)
-  @JoinTable()
+  @OneToMany(() => CommentEntity, (comment) => comment.news)
   comments: CommentEntity[];
+
+  @ManyToOne(() => UserEntity, (user) => user.news)
+  user: UserEntity;
 }

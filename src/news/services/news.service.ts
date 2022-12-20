@@ -3,14 +3,12 @@ import {
   CreateNewsDto,
   DeleteNewsDto,
   FindNewsDto,
-  News,
   RedactNewsDto,
 } from '../dto/news.dto';
 import { PATH } from 'src/shared/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NewsEntity } from '../entities/news.entity';
 import { Repository } from 'typeorm';
-
 @Injectable()
 export class NewsService {
   constructor(
@@ -28,7 +26,12 @@ export class NewsService {
   }
 
   async findNews(news: FindNewsDto) {
-    const response = await this.newsRepository.findOneBy({ id: news.id });
+    const response = await this.newsRepository.findOne({
+      where: {
+        id: news.id,
+      },
+      relations: ['comments'],
+    });
     return response;
   }
 

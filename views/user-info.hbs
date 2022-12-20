@@ -1,0 +1,31 @@
+<section class="d-flex justify-content-center">
+  <form class="col-8" method="post" action="http://localhost:3000/user/{{action}}" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="email" class="form-label">Email address</label>
+      <input name="email" type="email" class="form-control" value="{{user.email}}"  id="email" aria-describedby="email">
+      <div id="email-help" class="form-text">We'll never share your email with anyone else.</div>
+    </div>
+    <div class="mb-3">
+      <label for="password" class="form-label">Password</label>
+      <input name="password" type="password" value="" class="form-control" id="password">
+    </div>
+    <div class="mb-3">
+      <label for="first-name" class="form-label">First name</label>
+      <input name="firstName" type="text" value="{{user.firstName}}" class="form-control" id="first-name" aria-describedby="first-name">
+      <div id="first-name-help" class="form-text">Your first name</div>
+    </div>
+    <div class="mb-3">
+      <label for="last-name" class="form-label">Last name</label>
+      <input name="lastName" type="text" value="{{user.lastName}}"  class="form-control" id="last-name" aria-describedby="last-name">
+      <div id="last-name-help" class="form-text">Your last name.</div>
+    </div>
+    {{#if user.image}}
+      <img src="{{user.image}}" alt="picture">
+    {{/if}}
+    <div class="mb-3">
+      <label for="formFile" class="form-label">Default file input example</label>
+      <input name="cover" class="form-control" type="file" id="formFile">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</section>

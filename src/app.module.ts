@@ -9,6 +9,12 @@ import { CommentModule } from './comment/modules/comment.module';
 import { MailModule } from './mail/modules/mail.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserService } from './user/services/user.service';
+import { UserModule } from './user/modules/user.module';
+import { AuthModule } from './auth/modules/auth.module';
+import { APP_GUARD } from "@nestjs/core";
+import { RolesGuard } from "./shared/guards/roles/roles.guard";
+import { JwtService } from "@nestjs/jwt";
 
 @Module({
   imports: [
@@ -33,8 +39,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     MailModule,
     ConfigModule.forRoot(),
+    UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: RolesGuard },
+    JwtService,
+  ],
 })
 export class AppModule {}

@@ -16,7 +16,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { diskStorage } from 'multer';
-import { Comment } from 'src/comment/dto/comment.dto';
 import { CommentService } from 'src/comment/services/comment.service';
 import { MailService } from 'src/mail/services/mail.service';
 import { editFileName } from 'src/shared/helper';
@@ -24,10 +23,12 @@ import {
   CreateNewsDto,
   DeleteNewsDto,
   FindNewsDto,
-  News,
   RedactNewsDto,
 } from '../dto/news.dto';
 import { NewsService } from '../services/news.service';
+import { Public } from '../../shared/decorators/roles/public.decorator';
+import { Roles } from '../../shared/decorators/roles/roles.decorator';
+import { Roles as UserRoles } from '../../user/models/user.dto';
 
 @Controller('news/')
 export class NewsController {
@@ -37,6 +38,7 @@ export class NewsController {
     private readonly mailService: MailService,
   ) {}
 
+  @Public()
   @Get('')
   @Render('all-news')
   async getAllNewsPage() {
@@ -47,13 +49,12 @@ export class NewsController {
     };
   }
 
+  @Public()
   @Get('/:newsId/details')
   @Render('details-news')
   async getNewsPage(@Param('newsId') newsId: number) {
     const news = await this.newsService.findNews({ id: newsId });
-    console.log(news);
-    const newsComments = await this.commentService.getComments(+newsId);
-    const comments: Comment[] = [];
+    const { comments } = news;
     return {
       news,
       comments,
@@ -61,13 +62,14 @@ export class NewsController {
     };
   }
 
+  @Public()
   @Get('find')
   async findNews(@Query('news') news: FindNewsDto) {
-    console.log(news);
     return await this.newsService.findNews(news);
   }
 
   @Post('add')
+  @Roles(UserRoles.ADMIN)
   @UseInterceptors(
     FileInterceptor('cover', {
       storage: diskStorage({
@@ -80,7 +82,6 @@ export class NewsController {
     @Body() news: CreateNewsDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log(news);
     news.authorId = +news.authorId;
     const addedNews = await this.newsService.addNews(news, file);
     await this.mailService.sendMailAboutFreshNews(
@@ -95,6 +96,7 @@ export class NewsController {
     return addedNews;
   }
 
+  @Roles(UserRoles.ADMIN)
   @Put('')
   @UseInterceptors(
     FileInterceptor('cover', {
@@ -132,10 +134,12 @@ export class NewsController {
   }
 
   @Delete('')
+  @Roles(UserRoles.ADMIN)
   async deleteNews(@Body() news: DeleteNewsDto) {
     return await this.newsService.deleteNews(news);
   }
 
+  @Public()
   @Get('author')
   async getAuthorNews(@Query('authorId') authorId: number) {
     return await this.newsService.getAuthorNews(authorId);

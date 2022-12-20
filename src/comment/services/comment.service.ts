@@ -41,10 +41,7 @@ export class CommentService {
     return deletedComment;
   }
 
-  async updateComment(
-    commentId: number,
-    comment: EditCommentDto,
-  ) {
+  async updateComment(commentId: number, comment: EditCommentDto) {
     await this.commentsRepository.update(
       { id: commentId },
       {
@@ -54,5 +51,5 @@ export class CommentService {
     return await this.commentsRepository.findOneBy({ id: commentId });
   }
 
-  async addNestedComment(commentId: number, text: string) { }
+  async addNestedComment(commentId: number, text: string) {}
 }

@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { NewsEntity } from '../../news/entities/news.entity';
+import { UserEntity } from '../../user/entities/user.entity';
 
 @Entity('tbl_comments')
 export class CommentEntity {
@@ -19,4 +26,14 @@ export class CommentEntity {
 
   @Column({ name: 'comment', type: 'text', nullable: true, default: ' ' })
   comment: string;
+
+  @ManyToOne(() => NewsEntity, (news) => news.comments, {
+    createForeignKeyConstraints: false,
+  })
+  news: NewsEntity;
+
+  @ManyToOne(() => UserEntity, (user) => user.comments, {
+    createForeignKeyConstraints: false,
+  })
+  user: UserEntity;
 }
