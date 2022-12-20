@@ -1,60 +1,55 @@
 import { Injectable } from '@nestjs/common';
 import { AddCommentDto, Comment, EditCommentDto } from '../dto/comment.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { PATH } from 'src/shared/constants';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CommentEntity } from '../entities/comment.entity';
 
 @Injectable()
 export class CommentService {
-  comments: Map<string, Comment> = new Map();
+  constructor(
+    @InjectRepository(CommentEntity)
+    private readonly commentsRepository: Repository<CommentEntity>,
+  ) {}
 
-  async getComments(newsId: string): Promise<Record<string, Comment>> {
-    const resultMap: Record<string, Comment> = {};
-    this.comments.forEach((comment, id) => {
-      if (comment.newsId === newsId) {
-        resultMap[id] = comment;
-      }
-    });
-    return resultMap;
+  async getComments(newsId: number): Promise<CommentEntity[]> {
+    const response = await this.commentsRepository.findBy({ newsId });
+    return response;
   }
 
   async addComment(
     comment: AddCommentDto,
     image: Express.Multer.File,
-    newsId: string,
-  ): Promise<Comment> {
-    const addedComment: Comment = {
-      id: uuidv4(),
-      newsId,
-      ...comment,
-      cover: PATH + image.filename,
-      nestedComments: [],
-    };
-    this.comments.set(addedComment.id, addedComment);
+    newsId: number,
+  ): Promise<CommentEntity> {
+    const addedComment = new CommentEntity();
+    addedComment.comment = comment.text;
+    addedComment.newsId = newsId;
+    addedComment.author = comment.author;
+    addedComment.userId = +comment.userId;
+    addedComment.comment = comment.text;
+    addedComment.cover = PATH + image.filename;
+    await this.commentsRepository.save(addedComment);
     return addedComment;
   }
 
-  async deleteComment(commentId: string): Promise<Comment> {
-    const deletedComment = JSON.parse(
-      JSON.stringify(this.comments.get(commentId)),
-    );
-    this.comments.delete(commentId);
+  async deleteComment(commentId: number): Promise<CommentEntity> {
+    const deletedComment = await this.commentsRepository.findOneBy({
+      id: commentId,
+    });
+    await this.commentsRepository.delete({ id: commentId });
     return deletedComment;
   }
 
-  async updateComment(
-    commentId: string,
-    comment: EditCommentDto,
-    image: Express.Multer.File,
-  ): Promise<Comment> {
-    this.comments.set(commentId, { ...comment, cover: PATH + image.filename });
-    return this.comments.get(commentId);
+  async updateComment(commentId: number, comment: EditCommentDto) {
+    await this.commentsRepository.update(
+      { id: commentId },
+      {
+        comment: comment.text,
+      },
+    );
+    return await this.commentsRepository.findOneBy({ id: commentId });
   }
 
-  async addNestedComment(commentId: string, text: string) {
-    const comment = this.comments.get(commentId);
-    comment.nestedComments.push({
-      text,
-      id: uuidv4(),
-    });
-  }
+  async addNestedComment(commentId: number, text: string) {}
 }
