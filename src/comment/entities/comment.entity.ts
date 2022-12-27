@@ -1,9 +1,4 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { NewsEntity } from '../../news/entities/news.entity';
 import { UserEntity } from '../../user/entities/user.entity';
 
@@ -17,12 +12,6 @@ export class CommentEntity {
 
   @Column({ name: 'userId', type: 'bigint', nullable: false, default: 0 })
   userId: number;
-
-  @Column({ name: 'author', type: 'text', nullable: true, default: ' ' })
-  author: string;
-
-  @Column({ name: 'cover', type: 'text', nullable: true, default: ' ' })
-  cover: string;
 
   @Column({ name: 'comment', type: 'text', nullable: true, default: ' ' })
   comment: string;

@@ -1,15 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { AddCommentDto, Comment, EditCommentDto } from '../dto/comment.dto';
-import { PATH } from 'src/shared/constants';
+import { AddCommentDto, EditCommentDto } from '../dto/comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CommentEntity } from '../entities/comment.entity';
+import { NewsEntity } from '../../news/entities/news.entity';
+import { UserEntity } from '../../user/entities/user.entity';
 
 @Injectable()
 export class CommentService {
   constructor(
     @InjectRepository(CommentEntity)
     private readonly commentsRepository: Repository<CommentEntity>,
+    @InjectRepository(NewsEntity)
+    private readonly newsRepository: Repository<NewsEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
   ) {}
 
   async getComments(newsId: number): Promise<CommentEntity[]> {
@@ -19,16 +24,18 @@ export class CommentService {
 
   async addComment(
     comment: AddCommentDto,
-    image: Express.Multer.File,
     newsId: number,
   ): Promise<CommentEntity> {
     const addedComment = new CommentEntity();
     addedComment.comment = comment.text;
     addedComment.newsId = newsId;
-    addedComment.author = comment.author;
-    addedComment.userId = +comment.userId;
-    addedComment.comment = comment.text;
-    addedComment.cover = PATH + image.filename;
+    addedComment.userId = comment.userId;
+    addedComment.news = await this.newsRepository.findOneBy({
+      id: comment.newsId,
+    });
+    addedComment.user = await this.userRepository.findOneBy({
+      id: comment.userId,
+    });
     await this.commentsRepository.save(addedComment);
     return addedComment;
   }

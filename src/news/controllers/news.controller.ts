@@ -8,13 +8,13 @@ import {
   Post,
   Put,
   Query,
-  Render,
+  Render, Req,
   Res,
   UploadedFile,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { diskStorage } from 'multer';
 import { CommentService } from 'src/comment/services/comment.service';
 import { MailService } from 'src/mail/services/mail.service';
@@ -52,13 +52,23 @@ export class NewsController {
   @Public()
   @Get('/:newsId/details')
   @Render('details-news')
-  async getNewsPage(@Param('newsId') newsId: number) {
+  async getNewsPage(@Param('newsId') newsId: number, @Req() req: Request) {
+    let mainId = 0;
+    let role = UserRoles.GUEST;
+    const user = req.user as { id: number; role: UserRoles };
+    if (req.user) {
+      mainId = user.id;
+      role = user.role;
+    }
     const news = await this.newsService.findNews({ id: newsId });
     const { comments } = news;
+    console.log(comments);
     return {
       news,
       comments,
       title: 'Новость',
+      mainId,
+      role,
     };
   }
 

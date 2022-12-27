@@ -35,6 +35,10 @@ export class NewsService {
     return response;
   }
 
+  async getNewsById(id: number) {
+    return await this.newsRepository.findOneBy({ id });
+  }
+
   async addNews(news: CreateNewsDto, image: Express.Multer.File) {
     const addedNews = new NewsEntity();
     addedNews.author = news.author;

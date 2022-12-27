@@ -9,12 +9,13 @@ import { CommentModule } from './comment/modules/comment.module';
 import { MailModule } from './mail/modules/mail.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserService } from './user/services/user.service';
 import { UserModule } from './user/modules/user.module';
 import { AuthModule } from './auth/modules/auth.module';
-import { APP_GUARD } from "@nestjs/core";
-import { RolesGuard } from "./shared/guards/roles/roles.guard";
-import { JwtService } from "@nestjs/jwt";
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './shared/guards/roles/roles.guard';
+import { JwtModule, JwtService } from "@nestjs/jwt";
+import { JwtStrategy } from "./auth/strategy/jwt.strategy";
+import { JwtStrategyGuard } from "./shared/decorators/wrappers/strategies";
 
 @Module({
   imports: [
@@ -37,6 +38,14 @@ import { JwtService } from "@nestjs/jwt";
       }),
       inject: [ConfigService],
     }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigService) => ({
+        secret: config.get('JWT_SECRET'),
+        signOptions: { expiresIn: '1h' },
+      }),
+      inject: [ConfigService],
+    }),
     MailModule,
     ConfigModule.forRoot(),
     UserModule,
@@ -46,7 +55,11 @@ import { JwtService } from "@nestjs/jwt";
   providers: [
     AppService,
     { provide: APP_GUARD, useClass: RolesGuard },
-    JwtService,
+    JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: JwtStrategyGuard,
+    },
   ],
 })
 export class AppModule {}

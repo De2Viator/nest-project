@@ -33,7 +33,6 @@ export class UserController {
     @Body() user: CreateUserDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log(user);
     return await this.userService.createUser(user, file);
   }
 
